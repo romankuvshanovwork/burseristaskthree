@@ -49,7 +49,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-function SearchAppBar() {
+function SearchAppBar({ onSearch }: { onSearch: Function }) {
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
@@ -64,6 +64,7 @@ function SearchAppBar() {
             <StyledInputBase
               placeholder="Начните вводить город или населенный пункт…"
               inputProps={{ "aria-label": "search" }}
+              onChange={(event) => onSearch(event.target.value)}
             />
           </Search>
         </Toolbar>
