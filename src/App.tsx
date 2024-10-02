@@ -3,9 +3,10 @@ import "./App.css";
 import SearchAppBar from "./components/SearchAppBar/SearchAppBar";
 import ShowWindInfo from "./components/ShowWindInfo/ShowWindInfo";
 import ShowCityInfo from "./components/ShowCityInfo/ShowCityInfo";
+import ICityOption from "./interfaces/ICityOption";
 
 function App() {
-  const [currentCityData, setCurrentCityData] = useState<any>(); 
+  const [currentCityData, setCurrentCityData] = useState<ICityOption>(); 
   // TODO: Добавить типизацию через интерфейс
 
   return (

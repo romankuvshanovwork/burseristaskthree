@@ -8,11 +8,12 @@ import { SearchStyled } from "../Styled/SearchStyled/SearchStyled";
 import { SearchIconWrapperStyled } from "../Styled/SearchIconWrapperStyled/SearchIconWrapperStyled";
 import SearchAppBarTitle from "./SearchAppBarTitle/SearchAppBarTitle";
 import SearchAppBarAutocomplete from "./SearchAppBarAutocomplete/SearchAppBarAutocomplete";
+import ICityOption from "../../interfaces/ICityOption";
 
 function SearchAppBar({ onCityChange }: { onCityChange: Function }) {
   const [loading, setLoading] = useState(false);
   const [currentCity, setCurrentCity] = useState<string>("");
-  const [cityOptions, setCityOptions] = useState<any[]>([]);
+  const [cityOptions, setCityOptions] = useState<ICityOption[]>([]);
 
   useEffect(() => {
     if (!currentCity) return;
@@ -73,7 +74,7 @@ function SearchAppBar({ onCityChange }: { onCityChange: Function }) {
             <SearchAppBarAutocomplete
               options={cityOptions}
               loading={loading}
-              onChange={(event, value: any, reason) => {
+              onChange={(event, value: ICityOption, reason) => {
                 if (reason === "selectOption") {
                   onCityChange(value ? value : "");
                 }

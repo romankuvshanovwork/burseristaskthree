@@ -4,6 +4,7 @@ import Autocomplete, {
   AutocompleteInputChangeReason,
 } from "@mui/material/Autocomplete/Autocomplete";
 import { InputTextFieldStyled } from "../../Styled/InputTextFieldStyled/InputTextFieldStyled";
+import ICityOption from "../../../interfaces/ICityOption";
 
 function SearchAppBarAutocomplete({
   options,
@@ -11,7 +12,7 @@ function SearchAppBarAutocomplete({
   onChange,
   onInputChange,
 }: {
-  options: any[];
+  options: ICityOption[];
   loading: boolean;
   onChange: (
     event: React.SyntheticEvent<Element, Event>,
