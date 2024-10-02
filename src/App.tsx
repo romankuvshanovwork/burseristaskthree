@@ -10,8 +10,8 @@ function App() {
 
   return (
     <>
-      <SearchAppBar onSearch={setCurrentCityData} />
-      <ShowCityInfo cityName={currentCityData?.cityData?.label} />
+      <SearchAppBar onCityChange={setCurrentCityData} />
+      <ShowCityInfo cityName={currentCityData?.cityData?.cityName} />
       <ShowWindInfo windSpeed={currentCityData?.cityData?.windSpeed} />
     </>
   );

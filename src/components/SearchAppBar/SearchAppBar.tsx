@@ -3,16 +3,15 @@ import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import SearchIcon from "@mui/icons-material/Search";
-import Autocomplete from "@mui/material/Autocomplete/Autocomplete";
 import { useEffect, useState } from "react";
 import { SearchStyled } from "../Styled/SearchStyled/SearchStyled";
 import { SearchIconWrapperStyled } from "../Styled/SearchIconWrapperStyled/SearchIconWrapperStyled";
-import { InputTextFieldStyled } from "../Styled/InputTextFieldStyled/InputTextFieldStyled";
 import SearchAppBarTitle from "./SearchAppBarTitle/SearchAppBarTitle";
+import SearchAppBarAutocomplete from "./SearchAppBarAutocomplete/SearchAppBarAutocomplete";
 
-function SearchAppBar({ onSearch }: { onSearch: Function }) {
+function SearchAppBar({ onCityChange }: { onCityChange: Function }) {
   const [loading, setLoading] = useState(false);
-  const [currentCity, setCurrentCity] = useState<any>();
+  const [currentCity, setCurrentCity] = useState<string>("");
   const [cityOptions, setCityOptions] = useState<any[]>([]);
 
   useEffect(() => {
@@ -43,9 +42,7 @@ function SearchAppBar({ onSearch }: { onSearch: Function }) {
                 } (Скорость ветра: ${windSpeed} км/ч)`,
                 value: result.name,
                 cityData: {
-                  latitude: result.latitude,
-                  longitude: result.longitude,
-                  label: result.name,
+                  cityName: result.name,
                   windSpeed: windSpeed,
                 },
                 key: result?.id,
@@ -73,29 +70,15 @@ function SearchAppBar({ onSearch }: { onSearch: Function }) {
             <SearchIconWrapperStyled>
               <SearchIcon />
             </SearchIconWrapperStyled>
-            <Autocomplete
-              disablePortal
+            <SearchAppBarAutocomplete
               options={cityOptions}
               loading={loading}
-              loadingText="Идет загузка…"
-              filterOptions={(x) => x}
-              getOptionKey={(value) => value.key}
-              noOptionsText="Нет городов по вашему запросу"
-              renderInput={(params) => (
-                <InputTextFieldStyled
-                  placeholder="Начните вводить город или населенный пункт…"
-                  {...params}
-                />
-              )}
               onChange={(event, value: any, reason) => {
                 if (reason === "selectOption") {
-                  onSearch(value ? value : "");
+                  onCityChange(value ? value : "");
                 }
               }}
-              onInputChange={(event, value, reason) => {
-                console.log(value);
-                setCurrentCity(value);
-              }}
+              onInputChange={(event, value, reason) => setCurrentCity(value)}
             />
           </SearchStyled>
         </Toolbar>
