@@ -11,6 +11,44 @@ import SearchAppBarAutocomplete from "./SearchAppBarAutocomplete/SearchAppBarAut
 import ICityOption from "../../interfaces/ICityOption";
 import useDebounce from "../../hooks/useDebounce";
 
+function getCitiesData(query: string) {
+  return fetch(
+    `https://geocoding-api.open-meteo.com/v1/search?name=${query}&count=100&language=ru&format=json`
+  )
+    .then((data) => data.json())
+    .then((data) => {
+      const cityResults = data?.results || [];
+      const fetchWindSpeedPromises = cityResults.map((result: any) => {
+        const { latitude, longitude } = result;
+        return fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=wind_speed_10m&forecast_days=0`
+        )
+          .then((response) => response.json())
+          .then((forecastData) => {
+            const windSpeed = forecastData.current?.wind_speed_10m || "н/д";
+            return {
+              label: `${result.country ? result.country + ", " : ""}${
+                result.admin1 ? result.admin1 + ", " : ""
+              }${result.admin2 ? result.admin2 + ", " : ""}${
+                result.admin3 ? result.admin3 + ", " : ""
+              }${result.admin4 ? result.admin4 + ", " : ""}${
+                result.name
+              } (Скорость ветра: ${windSpeed} км/ч)`,
+              value: result.name,
+              cityData: {
+                cityName: result.name,
+                windSpeed: windSpeed,
+              },
+              key: result?.id,
+            };
+          });
+      });
+
+      return Promise.all(fetchWindSpeedPromises);
+    })
+    .catch((error) => Promise.reject(error));
+}
+
 function SearchAppBar({ onCityChange }: { onCityChange: Function }) {
   const [loading, setLoading] = useState(false);
   const [currentCity, setCurrentCity] = useState<string>("");
@@ -22,40 +60,7 @@ function SearchAppBar({ onCityChange }: { onCityChange: Function }) {
     if (!debouncedCurrentCity) return;
 
     setLoading(true);
-    fetch(
-      `https://geocoding-api.open-meteo.com/v1/search?name=${debouncedCurrentCity}&count=100&language=ru&format=json`
-    )
-      .then((data) => data.json())
-      .then((data) => {
-        const cityResults = data?.results || [];
-        const fetchWindSpeedPromises = cityResults.map((result: any) => {
-          const { latitude, longitude } = result;
-          return fetch(
-            `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=wind_speed_10m&forecast_days=0`
-          )
-            .then((response) => response.json())
-            .then((forecastData) => {
-              const windSpeed = forecastData.current?.wind_speed_10m || "н/д";
-              return {
-                label: `${result.country ? result.country + ", " : ""}${
-                  result.admin1 ? result.admin1 + ", " : ""
-                }${result.admin2 ? result.admin2 + ", " : ""}${
-                  result.admin3 ? result.admin3 + ", " : ""
-                }${result.admin4 ? result.admin4 + ", " : ""}${
-                  result.name
-                } (Скорость ветра: ${windSpeed} км/ч)`,
-                value: result.name,
-                cityData: {
-                  cityName: result.name,
-                  windSpeed: windSpeed,
-                },
-                key: result?.id,
-              };
-            });
-        });
-
-        return Promise.all(fetchWindSpeedPromises);
-      })
+    getCitiesData(debouncedCurrentCity)
       .then((enrichedCityOptions) => {
         setCityOptions(enrichedCityOptions);
       })
