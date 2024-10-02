@@ -2,13 +2,13 @@ import * as React from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
 import SearchIcon from "@mui/icons-material/Search";
 import Autocomplete from "@mui/material/Autocomplete/Autocomplete";
 import { useEffect, useState } from "react";
 import { SearchStyled } from "../Styled/SearchStyled/SearchStyled";
 import { SearchIconWrapperStyled } from "../Styled/SearchIconWrapperStyled/SearchIconWrapperStyled";
 import { InputTextFieldStyled } from "../Styled/InputTextFieldStyled/InputTextFieldStyled";
+import SearchAppBarTitle from "./SearchAppBarTitle/SearchAppBarTitle";
 
 function SearchAppBar({ onSearch }: { onSearch: Function }) {
   const [loading, setLoading] = useState(false);
@@ -68,17 +68,7 @@ function SearchAppBar({ onSearch }: { onSearch: Function }) {
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
         <Toolbar>
-          <Typography
-            variant="h6"
-            component="div"
-            sx={{
-              flexGrow: 0,
-              whiteSpace: "nowrap",
-              display: { xs: "none", sm: "block" },
-            }}
-          >
-            Поиск города:
-          </Typography>
+          <SearchAppBarTitle title="Поиск города:" />
           <SearchStyled sx={{ flexGrow: 1 }}>
             <SearchIconWrapperStyled>
               <SearchIcon />
