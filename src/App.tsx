@@ -7,7 +7,6 @@ import ICityOption from "./interfaces/ICityOption";
 
 function App() {
   const [currentCityData, setCurrentCityData] = useState<ICityOption>(); 
-  // TODO: Добавить типизацию через интерфейс
 
   return (
     <>

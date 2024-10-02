@@ -9,18 +9,21 @@ import { SearchIconWrapperStyled } from "../Styled/SearchIconWrapperStyled/Searc
 import SearchAppBarTitle from "./SearchAppBarTitle/SearchAppBarTitle";
 import SearchAppBarAutocomplete from "./SearchAppBarAutocomplete/SearchAppBarAutocomplete";
 import ICityOption from "../../interfaces/ICityOption";
+import useDebounce from "../../hooks/useDebounce";
 
 function SearchAppBar({ onCityChange }: { onCityChange: Function }) {
   const [loading, setLoading] = useState(false);
   const [currentCity, setCurrentCity] = useState<string>("");
   const [cityOptions, setCityOptions] = useState<ICityOption[]>([]);
 
+  const debouncedCurrentCity = useDebounce(currentCity, 500);
+
   useEffect(() => {
-    if (!currentCity) return;
+    if (!debouncedCurrentCity) return;
 
     setLoading(true);
     fetch(
-      `https://geocoding-api.open-meteo.com/v1/search?name=${currentCity}&count=100&language=ru&format=json`
+      `https://geocoding-api.open-meteo.com/v1/search?name=${debouncedCurrentCity}&count=100&language=ru&format=json`
     )
       .then((data) => data.json())
       .then((data) => {
@@ -60,7 +63,7 @@ function SearchAppBar({ onCityChange }: { onCityChange: Function }) {
         console.error("Ошибка получения данных:", error);
       })
       .finally(() => setLoading(false));
-  }, [currentCity]);
+  }, [debouncedCurrentCity]);
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -76,7 +79,7 @@ function SearchAppBar({ onCityChange }: { onCityChange: Function }) {
               loading={loading}
               onChange={(event, value: ICityOption, reason) => {
                 if (reason === "selectOption") {
-                  onCityChange(value ? value : "");
+                  onCityChange(value);
                 }
               }}
               onInputChange={(event, value, reason) => setCurrentCity(value)}
