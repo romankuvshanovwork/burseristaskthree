@@ -1,61 +1,14 @@
 import * as React from "react";
-import { styled, alpha } from "@mui/material/styles";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import SearchIcon from "@mui/icons-material/Search";
 import Autocomplete from "@mui/material/Autocomplete/Autocomplete";
-import TextField from "@mui/material/TextField/TextField";
 import { useEffect, useState } from "react";
-
-const Search = styled("div")(({ theme }) => ({
-  position: "relative",
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: alpha(theme.palette.common.white, 0.15),
-  "&:hover": {
-    backgroundColor: alpha(theme.palette.common.white, 0.25),
-  },
-  marginLeft: 0,
-  width: "100%",
-  [theme.breakpoints.up("sm")]: {
-    marginLeft: "25px",
-    width: "auto",
-  },
-}));
-
-const SearchIconWrapper = styled("div")(({ theme }) => ({
-  padding: theme.spacing(0, 2),
-  height: "100%",
-  position: "absolute",
-  pointerEvents: "none",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-}));
-
-const StyledInputTextFieldBase = styled(TextField)(({ theme }) => ({
-  color: "inherit",
-  width: "100%",
-  "& .MuiInputBase-root": {
-    padding: theme.spacing(0.25, 0.25, 0.25, 0),
-    color: "white",
-    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-    transition: theme.transitions.create("width"),
-    [theme.breakpoints.up("sm")]: {
-      width: "100%",
-      "&:focus": {
-        width: "100%",
-      },
-    },
-  },
-  "& .MuiOutlinedInput-notchedOutline": {
-    border: "none",
-  },
-  "& .MuiAutocomplete-endAdornment button": {
-    color: "white",
-  },
-}));
+import { SearchStyled } from "../Styled/SearchStyled/SearchStyled";
+import { SearchIconWrapperStyled } from "../Styled/SearchIconWrapperStyled/SearchIconWrapperStyled";
+import { InputTextFieldStyled } from "../Styled/InputTextFieldStyled/InputTextFieldStyled";
 
 function SearchAppBar({ onSearch }: { onSearch: Function }) {
   const [loading, setLoading] = useState(false);
@@ -126,10 +79,10 @@ function SearchAppBar({ onSearch }: { onSearch: Function }) {
           >
             Поиск города:
           </Typography>
-          <Search sx={{ flexGrow: 1 }}>
-            <SearchIconWrapper>
+          <SearchStyled sx={{ flexGrow: 1 }}>
+            <SearchIconWrapperStyled>
               <SearchIcon />
-            </SearchIconWrapper>
+            </SearchIconWrapperStyled>
             <Autocomplete
               disablePortal
               options={cityOptions}
@@ -139,7 +92,7 @@ function SearchAppBar({ onSearch }: { onSearch: Function }) {
               getOptionKey={(value) => value.key}
               noOptionsText="Нет городов по вашему запросу"
               renderInput={(params) => (
-                <StyledInputTextFieldBase
+                <InputTextFieldStyled
                   placeholder="Начните вводить город или населенный пункт…"
                   {...params}
                 />
@@ -154,7 +107,7 @@ function SearchAppBar({ onSearch }: { onSearch: Function }) {
                 setCurrentCity(value);
               }}
             />
-          </Search>
+          </SearchStyled>
         </Toolbar>
       </AppBar>
     </Box>
