@@ -18,7 +18,7 @@ function workersNeededMessage(windSpeed: number | undefined) {
   }
 }
 
-function ShowWindInfo({ windSpeed = 5 }: { windSpeed?: number }) {
+function ShowWindInfo({ windSpeed }: { windSpeed?: number }) {
   console.log(
     "2 'ShowWINDInfo' rendered at: ",
     new Date().toLocaleTimeString()

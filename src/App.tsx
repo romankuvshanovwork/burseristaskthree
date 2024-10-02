@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import "./App.css";
-import SearchAppBar from "./components/AppBar/AppBar";
+import SearchAppBar from "./components/SearchAppBar/SearchAppBar";
 import ShowWindInfo from "./components/ShowWindInfo/ShowWindInfo";
 import ShowCityInfo from "./components/ShowCityInfo/ShowCityInfo";
 
 function App() {
-  const [currentCity, setCurrentCity] = useState("");
+  const [currentCity, setCurrentCity] = useState<any>();
   const [currentWindSpeed, setCurrentWindSpeed] = useState();
 
   useEffect(() => {
@@ -34,8 +34,8 @@ function App() {
   return (
     <>
       <SearchAppBar onSearch={setCurrentCity} />
-      <ShowCityInfo cityName={currentCity} />
-      <ShowWindInfo windSpeed={currentWindSpeed} />
+      <ShowCityInfo cityName={currentCity?.value?.label} />
+      <ShowWindInfo windSpeed={currentCity?.value?.windSpeed ? currentCity?.value?.windSpeed : null} />
     </>
   );
 }

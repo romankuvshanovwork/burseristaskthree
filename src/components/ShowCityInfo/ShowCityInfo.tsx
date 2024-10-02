@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import Box from "@mui/material/Box/Box";
 import { Typography } from "@mui/material";
 
@@ -10,9 +10,9 @@ function ShowCityInfo({ cityName = "" }: { cityName?: string }) {
 
   return (
     <Box sx={{ marginX: "25px", marginY: "20px" }}>
-      <Typography>Город: {cityName ? cityName : "Пока не введен"}</Typography>
+      <Typography>Выбранный город (или населенный пункт): {cityName ? cityName : "Пока не введен"}</Typography>
     </Box>
   );
 }
 
-export default ShowCityInfo;
+export default memo(ShowCityInfo);
