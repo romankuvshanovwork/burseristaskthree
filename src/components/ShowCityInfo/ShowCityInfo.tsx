@@ -10,7 +10,10 @@ function ShowCityInfo({ cityName = "" }: { cityName?: string }) {
 
   return (
     <Box sx={{ marginX: "25px", marginY: "20px" }}>
-      <Typography>Выбранный город (или населенный пункт): {cityName ? cityName : "Пока не введен"}</Typography>
+      <Typography>
+        Выбранный город (или населенный пункт):{" "}
+        {cityName ? cityName : "Пока не введен"}
+      </Typography>
     </Box>
   );
 }

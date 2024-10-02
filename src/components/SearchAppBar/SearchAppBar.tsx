@@ -4,7 +4,6 @@ import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import InputBase from "@mui/material/InputBase";
 import SearchIcon from "@mui/icons-material/Search";
 import Autocomplete from "@mui/material/Autocomplete/Autocomplete";
 import TextField from "@mui/material/TextField/TextField";
@@ -17,7 +16,7 @@ const Search = styled("div")(({ theme }) => ({
   "&:hover": {
     backgroundColor: alpha(theme.palette.common.white, 0.25),
   },
-  marginLeft: "25px",
+  marginLeft: 0,
   width: "100%",
   [theme.breakpoints.up("sm")]: {
     marginLeft: "25px",
@@ -33,23 +32,6 @@ const SearchIconWrapper = styled("div")(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-}));
-
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: "inherit",
-  width: "100%",
-  "& .MuiInputBase-input": {
-    padding: theme.spacing(1, 1, 1, 0),
-    // vertical padding + font size from searchIcon
-    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-    transition: theme.transitions.create("width"),
-    [theme.breakpoints.up("sm")]: {
-      width: "100%",
-      "&:focus": {
-        width: "100%",
-      },
-    },
-  },
 }));
 
 const StyledInputTextFieldBase = styled(TextField)(({ theme }) => ({
@@ -89,7 +71,7 @@ function SearchAppBar({ onSearch }: { onSearch: Function }) {
     )
       .then((data) => data.json())
       .then((data) => {
-        const cityResults = data.results || [];
+        const cityResults = data?.results || [];
         const fetchWindSpeedPromises = cityResults.map((result: any) => {
           const { latitude, longitude } = result;
           return fetch(
@@ -99,14 +81,15 @@ function SearchAppBar({ onSearch }: { onSearch: Function }) {
             .then((forecastData) => {
               const windSpeed = forecastData.current?.wind_speed_10m || "н/д";
               return {
-                label: `${result.country ? result.country + "," : ""} ${
-                  result.admin1 ? result.admin1 + "," : ""
-                } ${result.admin2 ? result.admin2 + "," : ""} ${
-                  result.admin3 ? result.admin3 + "," : ""
-                } ${result.admin4 ? result.admin4 + "," : ""} ${
+                label: `${result.country ? result.country + ", " : ""}${
+                  result.admin1 ? result.admin1 + ", " : ""
+                }${result.admin2 ? result.admin2 + ", " : ""}${
+                  result.admin3 ? result.admin3 + ", " : ""
+                }${result.admin4 ? result.admin4 + ", " : ""}${
                   result.name
                 } (Скорость ветра: ${windSpeed} км/ч)`,
-                value: {
+                value: result.name,
+                cityData: {
                   latitude: result.latitude,
                   longitude: result.longitude,
                   label: result.name,
@@ -151,7 +134,9 @@ function SearchAppBar({ onSearch }: { onSearch: Function }) {
               disablePortal
               options={cityOptions}
               loading={loading}
+              loadingText="Идет загузка…"
               filterOptions={(x) => x}
+              getOptionKey={(value) => value.key}
               noOptionsText="Нет городов по вашему запросу"
               renderInput={(params) => (
                 <StyledInputTextFieldBase
@@ -164,13 +149,11 @@ function SearchAppBar({ onSearch }: { onSearch: Function }) {
                   onSearch(value ? value : "");
                 }
               }}
-              onInputChange={(event, value, reason) => setCurrentCity(value)}
+              onInputChange={(event, value, reason) => {
+                console.log(value);
+                setCurrentCity(value);
+              }}
             />
-            {/* <StyledInputBase
-              placeholder="Начните вводить город или населенный пункт…"
-              inputProps={{ "aria-label": "search" }}
-              onChange={(event) => onSearch(event.target.value)}
-            /> */}
           </Search>
         </Toolbar>
       </AppBar>
