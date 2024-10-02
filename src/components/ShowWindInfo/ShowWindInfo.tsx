@@ -1,16 +1,36 @@
 import React, { memo } from "react";
 import Box from "@mui/material/Box/Box";
+import { Typography } from "@mui/material";
+
+function windMessage(windSpeed: number | undefined) {
+  if (windSpeed) {
+    return `${windSpeed} м/c`;
+  } else {
+    return `Нельзя отобразить для незаданного города`;
+  }
+}
+
+function workersNeededMessage(windSpeed: number | undefined) {
+  if (windSpeed) {
+    return `${Math.ceil(windSpeed / 1)} человек`;
+  } else {
+    return `Нельзя отобразить для незаданного города`;
+  }
+}
 
 function ShowWindInfo({ windSpeed = 5 }: { windSpeed?: number }) {
-  console.log("'2 ShowWINDInfo' rendered at: ", new Date().toLocaleTimeString());
+  console.log(
+    "2 'ShowWINDInfo' rendered at: ",
+    new Date().toLocaleTimeString()
+  );
 
   return (
     <Box sx={{ marginX: "25px", marginY: "20px" }}>
-      <p>Скорость ветра: {windSpeed} м/c</p>
-      <p>
+      <Typography>Скорость ветра: {windMessage(windSpeed)}</Typography>
+      <Typography>
         Человек, необходимых для поддержания скважины:{" "}
-        {Math.ceil(windSpeed / 1)} человек
-      </p>
+        {workersNeededMessage(windSpeed)}
+      </Typography>
     </Box>
   );
 }
