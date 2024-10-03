@@ -3,7 +3,7 @@ import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import SearchIcon from "@mui/icons-material/Search";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { SearchStyled } from "../Styled/SearchStyled/SearchStyled";
 import { SearchIconWrapperStyled } from "../Styled/SearchIconWrapperStyled/SearchIconWrapperStyled";
 import SearchAppBarTitle from "./SearchAppBarTitle/SearchAppBarTitle";
@@ -19,6 +19,7 @@ import {
   AutocompleteInputChangeReason,
 } from "@mui/material/Autocomplete/Autocomplete";
 import axios from "axios";
+import { useQuery } from "@tanstack/react-query";
 
 function getLabel(result: any, windSpeed: string) {
   const parts = [
@@ -59,22 +60,74 @@ function getCitiesData(query: string) {
               },
               key: result?.id,
             };
+          })
+          .catch((error) => {
+            throw error;
           });
       });
 
       return Promise.all(fetchWindSpeedPromises);
     })
-    .catch((error) => Promise.reject(error));
+    .catch((error) => {
+      throw error;
+    });
 }
 
-function SearchAppBar({ onCityChange }: { onCityChange: Function }) {
-  const [loading, setLoading] = useState(false);
+async function getCitiesDataAsync(query: string) {
+  const response = await axios.get(
+    `${BASE_GEOCODING_API_URL}/search?name=${query}&count=100&language=ru&format=json`
+  );
+  const cityResults = response.data?.results || [];
+
+  return await cityResults.map(async (cityResult: any) => {
+    const { latitude, longitude } = cityResult;
+    const response = await axios.get(
+      `${BASE_METEO_API_URL}/forecast?latitude=${latitude}&longitude=${longitude}&current=wind_speed_10m&forecast_days=0`
+    );
+    const windSpeed = response.data.current?.wind_speed_10m || "н/д";
+
+    return {
+      label: getLabel(cityResult, windSpeed),
+      value: cityResult.name,
+      cityData: {
+        cityName: cityResult.name,
+        windSpeed: windSpeed,
+      },
+      key: cityResult?.id,
+    };
+  });
+}
+
+//getCitiesDataAsync("Москва").then((res) => console.log(res));
+
+function SearchAppBar({
+  onCityChange,
+  onError,
+}: {
+  onCityChange: Function;
+  onError: Function;
+}) {
+  const [searchValueChanged, setSearchValueChanged] = useState(false);
   const [currentCity, setCurrentCity] = useState<string>("");
-  const [cityOptions, setCityOptions] = useState<ICityOption[]>([]);
 
   const debouncedCurrentCity = useDebounce(currentCity, 500);
 
-  const memoizedCityOptions = useMemo(() => cityOptions, [cityOptions]);
+  const {
+    data = [],
+    error,
+    isLoading,
+  } = useQuery({
+    queryKey: ["cities", debouncedCurrentCity],
+    queryFn: () => getCitiesData(debouncedCurrentCity),
+    enabled: !!debouncedCurrentCity,
+    staleTime: 1 * (60 * 1000),
+    gcTime: 5 * (60 * 1000),
+  });
+
+  useEffect(() => {
+    console.log("Error", error);
+    onError(error);
+  }, [error, onError]);
 
   function onCityOptionChange(
     event: React.SyntheticEvent<Element, Event>,
@@ -92,26 +145,12 @@ function SearchAppBar({ onCityChange }: { onCityChange: Function }) {
     reason: AutocompleteInputChangeReason
   ) {
     if (value) {
-      setLoading(true);
+      setSearchValueChanged(true);
     } else {
-      setLoading(false);
+      setSearchValueChanged(false);
     }
     setCurrentCity(value);
   }
-
-  useEffect(() => {
-    if (!debouncedCurrentCity) return;
-
-    setLoading(true);
-    getCitiesData(debouncedCurrentCity)
-      .then((enrichedCityOptions) => {
-        setCityOptions(enrichedCityOptions);
-      })
-      .catch((error) => {
-        console.error("Ошибка получения данных:", error);
-      })
-      .finally(() => setLoading(false));
-  }, [debouncedCurrentCity]);
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -123,8 +162,8 @@ function SearchAppBar({ onCityChange }: { onCityChange: Function }) {
               <SearchIcon />
             </SearchIconWrapperStyled>
             <SearchAppBarAutocomplete
-              options={memoizedCityOptions}
-              loading={loading}
+              options={data}
+              loading={isLoading || searchValueChanged}
               onChange={onCityOptionChange}
               onInputChange={onAutocompleteInputChange}
             />
