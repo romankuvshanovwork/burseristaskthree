@@ -10,30 +10,44 @@ import SearchAppBarTitle from "./SearchAppBarTitle/SearchAppBarTitle";
 import SearchAppBarAutocomplete from "./SearchAppBarAutocomplete/SearchAppBarAutocomplete";
 import ICityOption from "../../interfaces/ICityOption";
 import useDebounce from "../../hooks/useDebounce";
+import {
+  BASE_GEOCODING_API_URL,
+  BASE_METEO_API_URL,
+} from "../../constants/baseURLs";
+import {
+  AutocompleteChangeReason,
+  AutocompleteInputChangeReason,
+} from "@mui/material/Autocomplete/Autocomplete";
+
+function getLabel(result: any, windSpeed: string) {
+  const parts = [
+    result.country,
+    result.admin1,
+    result.admin2,
+    result.admin3,
+    result.admin4,
+    result.name,
+  ].filter(Boolean);
+  return `${parts.join(", ")} (Скорость ветра: ${windSpeed} км/ч)`;
+}
 
 function getCitiesData(query: string) {
   return fetch(
-    `https://geocoding-api.open-meteo.com/v1/search?name=${query}&count=100&language=ru&format=json`
+    `${BASE_GEOCODING_API_URL}/search?name=${query}&count=100&language=ru&format=json`
   )
-    .then((data) => data.json())
+    .then((response) => response.json())
     .then((data) => {
       const cityResults = data?.results || [];
       const fetchWindSpeedPromises = cityResults.map((result: any) => {
         const { latitude, longitude } = result;
         return fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=wind_speed_10m&forecast_days=0`
+          `${BASE_METEO_API_URL}/forecast?latitude=${latitude}&longitude=${longitude}&current=wind_speed_10m&forecast_days=0`
         )
           .then((response) => response.json())
           .then((forecastData) => {
             const windSpeed = forecastData.current?.wind_speed_10m || "н/д";
             return {
-              label: `${result.country ? result.country + ", " : ""}${
-                result.admin1 ? result.admin1 + ", " : ""
-              }${result.admin2 ? result.admin2 + ", " : ""}${
-                result.admin3 ? result.admin3 + ", " : ""
-              }${result.admin4 ? result.admin4 + ", " : ""}${
-                result.name
-              } (Скорость ветра: ${windSpeed} км/ч)`,
+              label: getLabel(result, windSpeed),
               value: result.name,
               cityData: {
                 cityName: result.name,
@@ -57,6 +71,29 @@ function SearchAppBar({ onCityChange }: { onCityChange: Function }) {
   const debouncedCurrentCity = useDebounce(currentCity, 500);
 
   const memoizedCityOptions = useMemo(() => cityOptions, [cityOptions]);
+
+  function onCityOptionChange(
+    event: React.SyntheticEvent<Element, Event>,
+    value: ICityOption,
+    reason: AutocompleteChangeReason
+  ) {
+    if (reason === "selectOption") {
+      onCityChange(value);
+    }
+  }
+
+  function onAutocompleteInputChange(
+    event: React.SyntheticEvent<Element, Event>,
+    value: string,
+    reason: AutocompleteInputChangeReason
+  ) {
+    if (value) {
+      setLoading(true);
+    } else {
+      setLoading(false);
+    }
+    setCurrentCity(value);
+  }
 
   useEffect(() => {
     if (!debouncedCurrentCity) return;
@@ -84,15 +121,8 @@ function SearchAppBar({ onCityChange }: { onCityChange: Function }) {
             <SearchAppBarAutocomplete
               options={memoizedCityOptions}
               loading={loading}
-              onChange={(event, value: ICityOption, reason) => {
-                if (reason === "selectOption") {
-                  onCityChange(value);
-                }
-              }}
-              onInputChange={(event, value, reason) => {
-                setCurrentCity(value);
-                setLoading(true);
-              }}
+              onChange={onCityOptionChange}
+              onInputChange={onAutocompleteInputChange}
             />
           </SearchStyled>
         </Toolbar>
