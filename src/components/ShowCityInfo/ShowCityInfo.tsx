@@ -4,6 +4,7 @@ import { Typography } from "@mui/material";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 
 function ShowCityInfo({ cityName = "" }: { cityName?: string }) {
+  // Можно посмотреть когда компонент ре-рендериться, чтобы увидеть эффект мемоизации
   console.log(
     "1 'ShowCITYInfo' rendered at: ",
     new Date().toLocaleTimeString()

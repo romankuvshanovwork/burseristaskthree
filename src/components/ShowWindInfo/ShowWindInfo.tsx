@@ -21,6 +21,7 @@ function workersNeededMessage(windSpeed: number | undefined) {
 }
 
 function ShowWindInfo({ windSpeed }: { windSpeed?: number }) {
+  // Можно посмотреть когда компонент ре-рендериться, чтобы увидеть эффект мемоизации
   console.log(
     "2 'ShowWINDInfo' rendered at: ",
     new Date().toLocaleTimeString()
