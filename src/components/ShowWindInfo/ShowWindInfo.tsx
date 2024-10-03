@@ -1,6 +1,8 @@
 import React, { memo } from "react";
 import Box from "@mui/material/Box/Box";
 import { Typography } from "@mui/material";
+import AirIcon from "@mui/icons-material/Air";
+import PeopleIcon from "@mui/icons-material/People";
 
 function windMessage(windSpeed: number | undefined) {
   if (windSpeed) {
@@ -26,8 +28,12 @@ function ShowWindInfo({ windSpeed }: { windSpeed?: number }) {
 
   return (
     <Box sx={{ marginX: "25px", marginY: "20px" }}>
-      <Typography>Скорость ветра: {windMessage(windSpeed)}</Typography>
-      <Typography>
+      <Typography sx={{ display: "flex", columnGap: "15px" }}>
+        <AirIcon />
+        Скорость ветра: {windMessage(windSpeed)}
+      </Typography>
+      <Typography sx={{ display: "flex", columnGap: "15px" }}>
+        <PeopleIcon />
         Человек, необходимых для поддержания скважины:{" "}
         {workersNeededMessage(windSpeed)}
       </Typography>
