@@ -18,6 +18,7 @@ import {
   AutocompleteChangeReason,
   AutocompleteInputChangeReason,
 } from "@mui/material/Autocomplete/Autocomplete";
+import axios from "axios";
 
 function getLabel(result: any, windSpeed: string) {
   const parts = [
@@ -32,20 +33,20 @@ function getLabel(result: any, windSpeed: string) {
 }
 
 function getCitiesData(query: string) {
-  return fetch(
-    `${BASE_GEOCODING_API_URL}/search?name=${query}&count=100&language=ru&format=json`
-  )
-    .then((response) => response.json())
-    .then((data) => {
-      const cityResults = data?.results || [];
+  return axios
+    .get(
+      `${BASE_GEOCODING_API_URL}/search?name=${query}&count=100&language=ru&format=json`
+    )
+    .then((response) => {
+      const cityResults = response.data?.results || [];
       const fetchWindSpeedPromises = cityResults.map((result: any) => {
         const { latitude, longitude } = result;
-        return fetch(
-          `${BASE_METEO_API_URL}/forecast?latitude=${latitude}&longitude=${longitude}&current=wind_speed_10m&forecast_days=0`
-        )
-          .then((response) => response.json())
-          .then((forecastData) => {
-            const windSpeed = forecastData.current?.wind_speed_10m || "н/д";
+        return axios
+          .get(
+            `${BASE_METEO_API_URL}/forecast?latitude=${latitude}&longitude=${longitude}&current=wind_speed_10m&forecast_days=0`
+          )
+          .then((response) => {
+            const windSpeed = response.data.current?.wind_speed_10m || "н/д";
             return {
               label: getLabel(result, windSpeed),
               value: result.name,
