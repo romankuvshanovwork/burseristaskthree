@@ -10,22 +10,25 @@ function App() {
   const [currentCityData, setCurrentCityData] = useState<ICityOption>();
   const [error, setError] = useState<Error>();
 
-  if (error) {
-    return (
-      <>
-        <SearchAppBar onCityChange={setCurrentCityData} onError={setError} />
-        <ShowErrorMessage />
-      </>
-    );
-  } else {
-    return (
-      <>
-        <SearchAppBar onCityChange={setCurrentCityData} onError={setError} />
-        <ShowCityInfo cityName={currentCityData?.cityData?.cityName} />
-        <ShowWindInfo windSpeed={currentCityData?.cityData?.windSpeed} />
-      </>
-    );
-  }
+  const mainContent = (error?: Error) => {
+    if (error) {
+      return <ShowErrorMessage />;
+    } else {
+      return (
+        <>
+          <ShowCityInfo cityName={currentCityData?.cityData?.cityName} />
+          <ShowWindInfo windSpeed={currentCityData?.cityData?.windSpeed} />
+        </>
+      );
+    }
+  };
+
+  return (
+    <>
+      <SearchAppBar onCityChange={setCurrentCityData} onError={setError} />
+      {mainContent(error)}
+    </>
+  );
 }
 
 export default App;

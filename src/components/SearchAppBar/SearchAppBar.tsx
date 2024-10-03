@@ -125,7 +125,6 @@ function SearchAppBar({
   });
 
   useEffect(() => {
-    console.log("Error", error);
     onError(error);
   }, [error, onError]);
 
