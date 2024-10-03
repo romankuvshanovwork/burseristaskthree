@@ -79,26 +79,26 @@ async function getCitiesDataAsync(query: string) {
   );
   const cityResults = response.data?.results || [];
 
-  return await cityResults.map(async (cityResult: any) => {
-    const { latitude, longitude } = cityResult;
-    const response = await axios.get(
-      `${BASE_METEO_API_URL}/forecast?latitude=${latitude}&longitude=${longitude}&current=wind_speed_10m&forecast_days=0`
-    );
-    const windSpeed = response.data.current?.wind_speed_10m || "н/д";
+  return await Promise.all(
+    cityResults.map(async (cityResult: any) => {
+      const { latitude, longitude } = cityResult;
+      const response = await axios.get(
+        `${BASE_METEO_API_URL}/forecast?latitude=${latitude}&longitude=${longitude}&current=wind_speed_10m&forecast_days=0`
+      );
+      const windSpeed = response.data.current?.wind_speed_10m || "н/д";
 
-    return {
-      label: getLabel(cityResult, windSpeed),
-      value: cityResult.name,
-      cityData: {
-        cityName: cityResult.name,
-        windSpeed: windSpeed,
-      },
-      key: cityResult?.id,
-    };
-  });
+      return {
+        label: getLabel(cityResult, windSpeed),
+        value: cityResult.name,
+        cityData: {
+          cityName: cityResult.name,
+          windSpeed: windSpeed,
+        },
+        key: cityResult?.id,
+      };
+    })
+  );
 }
-
-//getCitiesDataAsync("Москва").then((res) => console.log(res));
 
 function SearchAppBar({
   onCityChange,
