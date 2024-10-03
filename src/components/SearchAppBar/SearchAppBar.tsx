@@ -3,7 +3,7 @@ import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import SearchIcon from "@mui/icons-material/Search";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { SearchStyled } from "../Styled/SearchStyled/SearchStyled";
 import { SearchIconWrapperStyled } from "../Styled/SearchIconWrapperStyled/SearchIconWrapperStyled";
 import SearchAppBarTitle from "./SearchAppBarTitle/SearchAppBarTitle";
@@ -11,70 +11,39 @@ import SearchAppBarAutocomplete from "./SearchAppBarAutocomplete/SearchAppBarAut
 import ICityOption from "../../interfaces/ICityOption";
 import useDebounce from "../../hooks/useDebounce";
 import {
-  BASE_GEOCODING_API_URL,
-  BASE_METEO_API_URL,
-} from "../../constants/baseURLs";
-import {
   AutocompleteChangeReason,
   AutocompleteInputChangeReason,
 } from "@mui/material/Autocomplete/Autocomplete";
-import axios from "axios";
+import { useQuery } from "@tanstack/react-query";
+import { getCitiesData } from "./utils/searchAppBarUtils";
 
-function getLabel(result: any, windSpeed: string) {
-  const parts = [
-    result.country,
-    result.admin1,
-    result.admin2,
-    result.admin3,
-    result.admin4,
-    result.name,
-  ].filter(Boolean);
-  return `${parts.join(", ")} (Скорость ветра: ${windSpeed} км/ч)`;
-}
-
-function getCitiesData(query: string) {
-  return axios
-    .get(
-      `${BASE_GEOCODING_API_URL}/search?name=${query}&count=100&language=ru&format=json`
-    )
-    .then((response) => {
-      const cityResults = response.data?.results || [];
-
-      const fetchWindSpeedPromises = cityResults.map((result: any) => {
-        const { latitude, longitude } = result;
-
-        return axios
-          .get(
-            `${BASE_METEO_API_URL}/forecast?latitude=${latitude}&longitude=${longitude}&current=wind_speed_10m&forecast_days=0`
-          )
-          .then((response) => {
-            const windSpeed = response.data.current?.wind_speed_10m || "н/д";
-
-            return {
-              label: getLabel(result, windSpeed),
-              value: result.name,
-              cityData: {
-                cityName: result.name,
-                windSpeed: windSpeed,
-              },
-              key: result?.id,
-            };
-          });
-      });
-
-      return Promise.all(fetchWindSpeedPromises);
-    })
-    .catch((error) => Promise.reject(error));
-}
-
-function SearchAppBar({ onCityChange }: { onCityChange: Function }) {
-  const [loading, setLoading] = useState(false);
+function SearchAppBar({
+  onCityChange,
+  onError,
+}: {
+  onCityChange: Function;
+  onError: Function;
+}) {
+  const [searchValueChanged, setSearchValueChanged] = useState(false);
   const [currentCity, setCurrentCity] = useState<string>("");
-  const [cityOptions, setCityOptions] = useState<ICityOption[]>([]);
 
   const debouncedCurrentCity = useDebounce(currentCity, 500);
 
-  const memoizedCityOptions = useMemo(() => cityOptions, [cityOptions]);
+  const {
+    data = [],
+    error,
+    isLoading,
+  } = useQuery({
+    queryKey: ["cities", debouncedCurrentCity],
+    queryFn: () => getCitiesData(debouncedCurrentCity),
+    enabled: !!debouncedCurrentCity,
+    staleTime: 1 * (60 * 1000),
+    gcTime: 5 * (60 * 1000),
+  });
+
+  useEffect(() => {
+    onError(error);
+  }, [error, onError]);
 
   function onCityOptionChange(
     event: React.SyntheticEvent<Element, Event>,
@@ -92,26 +61,12 @@ function SearchAppBar({ onCityChange }: { onCityChange: Function }) {
     reason: AutocompleteInputChangeReason
   ) {
     if (value) {
-      setLoading(true);
+      setSearchValueChanged(true);
     } else {
-      setLoading(false);
+      setSearchValueChanged(false);
     }
     setCurrentCity(value);
   }
-
-  useEffect(() => {
-    if (!debouncedCurrentCity) return;
-
-    setLoading(true);
-    getCitiesData(debouncedCurrentCity)
-      .then((enrichedCityOptions) => {
-        setCityOptions(enrichedCityOptions);
-      })
-      .catch((error) => {
-        console.error("Ошибка получения данных:", error);
-      })
-      .finally(() => setLoading(false));
-  }, [debouncedCurrentCity]);
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -123,8 +78,8 @@ function SearchAppBar({ onCityChange }: { onCityChange: Function }) {
               <SearchIcon />
             </SearchIconWrapperStyled>
             <SearchAppBarAutocomplete
-              options={memoizedCityOptions}
-              loading={loading}
+              options={data}
+              loading={isLoading || searchValueChanged}
               onChange={onCityOptionChange}
               onInputChange={onAutocompleteInputChange}
             />
