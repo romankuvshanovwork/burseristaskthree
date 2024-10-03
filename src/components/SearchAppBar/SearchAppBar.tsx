@@ -3,7 +3,7 @@ import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import SearchIcon from "@mui/icons-material/Search";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SearchStyled } from "../Styled/SearchStyled/SearchStyled";
 import { SearchIconWrapperStyled } from "../Styled/SearchIconWrapperStyled/SearchIconWrapperStyled";
 import SearchAppBarTitle from "./SearchAppBarTitle/SearchAppBarTitle";
@@ -56,6 +56,8 @@ function SearchAppBar({ onCityChange }: { onCityChange: Function }) {
 
   const debouncedCurrentCity = useDebounce(currentCity, 500);
 
+  const memoizedCityOptions = useMemo(() => cityOptions, [cityOptions]);
+
   useEffect(() => {
     if (!debouncedCurrentCity) return;
 
@@ -80,14 +82,17 @@ function SearchAppBar({ onCityChange }: { onCityChange: Function }) {
               <SearchIcon />
             </SearchIconWrapperStyled>
             <SearchAppBarAutocomplete
-              options={cityOptions}
+              options={memoizedCityOptions}
               loading={loading}
               onChange={(event, value: ICityOption, reason) => {
                 if (reason === "selectOption") {
                   onCityChange(value);
                 }
               }}
-              onInputChange={(event, value, reason) => setCurrentCity(value)}
+              onInputChange={(event, value, reason) => {
+                setCurrentCity(value);
+                setLoading(true);
+              }}
             />
           </SearchStyled>
         </Toolbar>
