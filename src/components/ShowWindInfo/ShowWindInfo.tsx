@@ -14,7 +14,7 @@ function windMessage(windSpeed: number | undefined) {
 
 function workersNeededMessage(windSpeed: number | undefined) {
   if (windSpeed) {
-    return `${Math.ceil(windSpeed / 1)} человек`;
+    return `${Math.ceil(windSpeed / 1)}`;
   } else {
     return `Нельзя отобразить для незаданного города`;
   }

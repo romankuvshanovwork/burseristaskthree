@@ -33,7 +33,7 @@ function SearchAppBarAutocomplete({
       getOptionKey={(value) => value.key}
       noOptionsText="Нет городов по вашему запросу"
       loading={loading}
-      loadingText="Идет загузка…"
+      loadingText="Идет загрузка…"
       renderInput={(params) => (
         <InputTextFieldStyled
           {...params}
