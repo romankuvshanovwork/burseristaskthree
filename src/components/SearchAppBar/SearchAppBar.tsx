@@ -39,14 +39,17 @@ function getCitiesData(query: string) {
     )
     .then((response) => {
       const cityResults = response.data?.results || [];
+
       const fetchWindSpeedPromises = cityResults.map((result: any) => {
         const { latitude, longitude } = result;
+
         return axios
           .get(
             `${BASE_METEO_API_URL}/forecast?latitude=${latitude}&longitude=${longitude}&current=wind_speed_10m&forecast_days=0`
           )
           .then((response) => {
             const windSpeed = response.data.current?.wind_speed_10m || "н/д";
+
             return {
               label: getLabel(result, windSpeed),
               value: result.name,
